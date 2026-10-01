@@ -27,6 +27,20 @@ pnpm dev                      # web: http://localhost:3000   admin: http://local
 
 Produksi: `pnpm build` lalu `pnpm start`.
 
+### Menjalankan dengan Docker
+
+Prasyarat: Docker Desktop. Tidak perlu Node/pnpm di komputer.
+
+```bash
+docker compose up -d          # web: http://localhost:3000   admin: http://localhost:3001/admin
+docker compose logs -f        # lihat log (start pertama butuh beberapa menit untuk pnpm install)
+docker compose down           # matikan
+```
+
+Saat start, container membuat `.env` dari `.env.example` bila belum ada, menjalankan `pnpm install`, menerapkan migrasi, dan menjalankan seed **hanya** bila `data/dev.db` belum ada. Kode, database SQLite (`data/`), dan upload (`uploads/`) tetap berada di folder repo, jadi perubahan kode langsung terlihat (hot reload) dan data tidak hilang saat container dihapus. Perintah lain dijalankan di dalam container, mis. `docker compose exec app pnpm db:seed`.
+
+Port host bisa diubah lewat variabel `WEB_PORT` / `ADMIN_PORT` (mis. di file `.env` di root). Di Windows, clone repo di dalam WSL (mis. `~/projects`) agar cepat; bila repo berada di drive Windows (`C:\...`) dan hot reload tidak jalan, set `WATCHPACK_POLLING=true`.
+
 ### Akun seed (HANYA untuk pengembangan)
 
 | Peran | Email | Kata sandi |
