@@ -1,0 +1,32 @@
+# Naruto CCG (dev)  web -> http://localhost:3000   admin -> http://localhost:3001/admin
+#   docker compose up -d
+# SQLite (data/dev.db) and uploads/ live in the repo folder, so no separate DB container is needed.
+
+name: naruto-ccg
+
+services:
+  app:
+    build: ./docker
+    image: naruto-ccg-node:dev
+    restart: unless-stopped
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        [ -f .env ] || cp .env.example .env
+        pnpm install --frozen-lockfile
+        if [ -f data/dev.db ]; then pnpm db:deploy; else pnpm db:deploy && pnpm db:seed; fi
+        exec pnpm dev
+    environment:
+      WATCHPACK_POLLING: ${WATCHPACK_POLLING:-false}
+      npm_config_store_dir: /home/node/.pnpm-store
+    volumes:
+      - .:/app
+      - pnpm-store:/home/node/.pnpm-store
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+      - "127.0.0.1:${ADMIN_PORT:-3001}:3001"
+
+volumes:
+  pnpm-store:
