@@ -1,0 +1,156 @@
+// SQLite for development. To move to PostgreSQL: change `provider`, set a postgresql:// DATABASE_URL,
+// and re-create the migrations. Enum-like columns are plain strings (validated by Zod in @naruto-ccg/shared)
+// so the schema stays portable across providers.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("USER") // USER | ADMIN
+  status       String   @default("ACTIVE") // ACTIVE | DISABLED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions        Session[]
+  wishlistItems   WishlistItem[]
+  collectionItems CollectionItem[]
+
+  @@index([username])
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique // sha256 of the cookie token; the raw token is never stored
+  scope     String   @default("WEB") // WEB | ADMIN — a web cookie can never open an admin session
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Series {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  code        String?   @unique // external series code used by import/export, e.g. "T4W2"
+  description String?
+  releaseDate DateTime?
+  image       String? // storage key
+  status      String    @default("DRAFT") // DRAFT | PUBLISHED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  cards Card[]
+
+  @@index([status])
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  seriesId    String
+  cardNumber  String
+  name        String
+  slug        String    @unique
+  image       String? // storage key
+  description String?
+  rarity      String
+  cardType    String
+  status      String    @default("DRAFT") // DRAFT | PUBLISHED
+  archivedAt  DateTime? // soft delete: set when users still reference the card
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  series          Series           @relation(fields: [seriesId], references: [id], onDelete: Restrict)
+  attributes      CardAttribute[]
+  wishlistItems   WishlistItem[]
+  collectionItems CollectionItem[]
+
+  @@unique([seriesId, cardNumber])
+  @@index([status, archivedAt])
+  @@index([rarity])
+  @@index([cardType])
+  @@index([name])
+}
+
+model CardAttribute {
+  id        String @id @default(cuid())
+  cardId    String
+  name      String
+  value     String
+  sortOrder Int    @default(0)
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, sortOrder])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  cardId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cardId])
+  @@index([cardId])
+}
+
+model CollectionItem {
+  id        String   @id @default(cuid())
+  userId    String
+  cardId    String
+  quantity  Int      @default(1)
+  buyPrice  Int? // free-form amount typed by the user (whole number, no currency)
+  sellPrice Int?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict: a card with collection records is archived, never hard-deleted, so history survives.
+  card   Card              @relation(fields: [cardId], references: [id], onDelete: Restrict)
+  images CollectionImage[]
+
+  @@unique([userId, cardId])
+  @@index([cardId])
+}
+
+model CollectionImage {
+  id               String   @id @default(cuid())
+  collectionItemId String
+  imageUrl         String // storage key
+  createdAt        DateTime @default(now())
+
+  collectionItem CollectionItem @relation(fields: [collectionItemId], references: [id], onDelete: Cascade)
+
+  @@index([collectionItemId])
+}
+
+/// Rank of each rarity name used by Card.rarity (free text). sortOrder 1 = highest.
+/// Names missing from this table sort after all ranked rarities.
+model Rarity {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int
+  createdAt DateTime @default(now())
+
+  @@index([sortOrder])
+}

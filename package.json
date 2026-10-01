@@ -1,0 +1,29 @@
+{
+  "name": "naruto-ccg",
+  "private": true,
+  "version": "1.0.0",
+  "packageManager": "pnpm@12.3.4",
+  "engines": { "node": ">=20.12" },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:web": "pnpm --filter @naruto-ccg/web dev",
+    "dev:admin": "pnpm --filter @naruto-ccg/admin dev",
+    "build": "pnpm --filter \"./apps/*\" build",
+    "start": "pnpm --parallel --filter \"./apps/*\" start",
+    "lint": "eslint .",
+    "typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
+    "test": "pnpm --filter @naruto-ccg/database test",
+    "test:e2e": "pnpm --filter @naruto-ccg/e2e test",
+    "prisma": "pnpm --filter @naruto-ccg/database prisma",
+    "db:generate": "pnpm --filter @naruto-ccg/database prisma generate",
+    "db:migrate": "pnpm --filter @naruto-ccg/database prisma migrate dev",
+    "db:deploy": "pnpm --filter @naruto-ccg/database prisma migrate deploy",
+    "db:seed": "pnpm --filter @naruto-ccg/database seed"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.7",
+    "typescript": "~5.9.3"
+  }
+}

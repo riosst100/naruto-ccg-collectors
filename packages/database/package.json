@@ -1,0 +1,26 @@
+{
+  "name": "@naruto-ccg/database",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "prisma": { "schema": "prisma/schema.prisma", "seed": "tsx prisma/seed.ts" },
+  "scripts": {
+    "postinstall": "node scripts/prisma.mjs generate",
+    "prisma": "node scripts/prisma.mjs",
+    "seed": "node scripts/prisma.mjs db seed",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@naruto-ccg/shared": "workspace:*",
+    "@prisma/client": "6.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "prisma": "6.19.3",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.0"
+  }
+}

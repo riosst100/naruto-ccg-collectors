@@ -1,0 +1,8 @@
+{
+  "name": "@naruto-ccg/e2e",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": { "test": "playwright test", "typecheck": "tsc --noEmit" },
+  "devDependencies": { "@playwright/test": "^1.55.0",
+    "exceljs": "^4.4.0", "@types/node": "^22.10.0", "typescript": "~5.9.3" }
+}
