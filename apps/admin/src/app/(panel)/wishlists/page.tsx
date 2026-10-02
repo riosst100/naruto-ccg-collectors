@@ -16,7 +16,7 @@ export default async function WishlistsPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title="Wishlist" subtitle={`${data.total} item wishlist dari semua pengguna · hanya baca`} />
-      <SearchBar placeholder="Nama pengguna, email, nama atau nomor kartu…" q={q} />
+      <SearchBar placeholder="Nama lengkap, email, nama atau nomor kartu…" q={q} />
       {data.items.length === 0 ? (
         <EmptyState title="Tidak ada item wishlist ditemukan" />
       ) : (

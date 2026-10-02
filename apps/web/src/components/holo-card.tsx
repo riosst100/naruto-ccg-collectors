@@ -4,7 +4,7 @@ import { useRef } from "react";
 
 export type RarityTier = "common" | "rare" | "super" | "ultra" | "secret";
 
-/** Wraps a card image with a pointer-driven 3D tilt and holographic foil / glare layers (styles: `.holo` in globals.css). */
+/** Wraps a card image with a pointer-driven 3D tilt and holographic foil layers (styles: `.holo` in globals.css). */
 export function HoloCard({ tier, className = "", children }: { tier: RarityTier; className?: string; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -33,7 +33,6 @@ export function HoloCard({ tier, className = "", children }: { tier: RarityTier;
       {children}
       <span className="holo-foil" aria-hidden />
       <span className="holo-sparkle" aria-hidden />
-      <span className="holo-glare" aria-hidden />
       <span className="holo-sweep" aria-hidden />
     </div>
   );

@@ -157,7 +157,7 @@ export async function serveUpload(segments: string[], authorize?: (key: string) 
   if (authorize && !(await authorize(key))) return new Response("Tidak ditemukan", { status: 404 });
   const found = await getStorage().get(key);
   if (!found) return new Response("Tidak ditemukan", { status: 404 });
-  const isPrivate = key.startsWith("collections/");
+  const isPrivate = key.startsWith("collections/") || key.startsWith("avatars/");
   return new Response(new Uint8Array(found.data), {
     headers: {
       "Content-Type": found.contentType,

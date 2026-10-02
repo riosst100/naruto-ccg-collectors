@@ -22,7 +22,7 @@ export default async function RaritiesPage() {
         <Table>
           <thead>
             <tr>
-              {["Peringkat", "Kelangkaan", "Kartu", "Urutan", "Aksi"].map((h) => (
+              {["Peringkat", "Kode", "Nama", "Kartu", "Urutan", "Aksi"].map((h) => (
                 <th key={h} className={th}>
                   {h}
                 </th>
@@ -34,6 +34,7 @@ export default async function RaritiesPage() {
               <tr key={r.id}>
                 <td className={`${td} font-mono`}>#{r.rank}</td>
                 <td className={`${td} font-medium`}>{r.name}</td>
+                <td className={td}>{r.label ?? <span className="text-slate-400">—</span>}</td>
                 <td className={td}>
                   <Link href={`/cards?rarity=${encodeURIComponent(r.name)}`} className="text-brand-700 hover:underline">
                     {r.cardCount}
@@ -51,7 +52,7 @@ export default async function RaritiesPage() {
                 </td>
                 <td className={td}>
                   <div className="flex gap-1.5">
-                    <RenameRarityButton id={r.id} name={r.name} />
+                    <RenameRarityButton id={r.id} name={r.name} label={r.label} />
                     <ActionButton
                       action={deleteRarityAction}
                       fields={{ id: r.id }}

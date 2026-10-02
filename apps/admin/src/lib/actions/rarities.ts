@@ -11,7 +11,7 @@ const refresh = () => revalidatePath("/", "layout");
 export async function createRarityAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   await requireAdmin();
   return guard(async () => {
-    await createRarity(str(fd, "name"));
+    await createRarity(str(fd, "name"), str(fd, "label"));
     refresh();
     return success("Kelangkaan ditambahkan (di peringkat terendah)");
   });
@@ -20,9 +20,9 @@ export async function createRarityAction(_prev: ActionState, fd: FormData): Prom
 export async function renameRarityAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   await requireAdmin();
   return guard(async () => {
-    await renameRarity(str(fd, "id"), str(fd, "name"));
+    await renameRarity(str(fd, "id"), str(fd, "name"), str(fd, "label"));
     refresh();
-    return success("Nama kelangkaan diubah (semua kartu terkait ikut diperbarui)");
+    return success("Kelangkaan diperbarui (kartu terkait ikut memakai kode baru)");
   });
 }
 

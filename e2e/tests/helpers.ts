@@ -20,7 +20,7 @@ export async function loginWeb(page: Page, creds: { email: string; password: str
   if (remember) await box.check();
   else await box.uncheck();
   await page.getByRole("button", { name: "Masuk" }).click();
-  await expect(page.getByRole("button", { name: "Keluar" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Menu akun" })).toBeVisible();
 }
 
 export async function loginAdmin(page: Page, creds: { email: string; password: string } = ADMIN, expectSuccess = true) {
@@ -39,6 +39,13 @@ export async function registerFresh(page: Page, prefix = "collector") {
   await page.locator('input[name="password"]').fill("Shinobi123");
   await page.getByLabel("Konfirmasi kata sandi").fill("Shinobi123");
   await page.getByRole("button", { name: "Buat akun" }).click();
-  await expect(page.getByText(`Halo, ${name}`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Menu akun" })).toContainText(name);
   return { name, email: `${name}@example.com`, password: "Shinobi123" };
+}
+
+/** Logs out through the header account menu and its confirmation dialog. */
+export async function logoutWeb(page: Page) {
+  await page.getByRole("button", { name: "Menu akun" }).click();
+  await page.getByRole("menuitem", { name: "Keluar" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Keluar" }).click();
 }

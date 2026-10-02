@@ -9,7 +9,7 @@ export async function listRaritiesRanked() {
     prisma.card.groupBy({ by: ["rarity"], _count: { _all: true } }),
   ]);
   const used = new Map(counts.map((c) => [c.rarity, c._count._all]));
-  return rows.map((r, i) => ({ id: r.id, name: r.name, rank: i + 1, cardCount: used.get(r.name) ?? 0 }));
+  return rows.map((r, i) => ({ id: r.id, name: r.name, label: r.label, rank: i + 1, cardCount: used.get(r.name) ?? 0 }));
 }
 
 /** Rank per rarity name (1 = highest). Names that are not ranked are absent: callers sort them last. */
@@ -45,12 +45,20 @@ function cleanName(raw: string): string {
   return name;
 }
 
-export async function createRarity(rawName: string) {
+/** Optional full name; empty means none. */
+function cleanLabel(raw: string): string | null {
+  const label = raw.trim();
+  if (label.length > 80) throw new ServiceError("Maksimal 80 karakter.", "label");
+  return label || null;
+}
+
+export async function createRarity(rawName: string, rawLabel = "") {
   const name = cleanName(rawName);
+  const label = cleanLabel(rawLabel);
   try {
     return await prisma.$transaction(async (tx) => {
       const last = await tx.rarity.aggregate({ _max: { sortOrder: true } });
-      return tx.rarity.create({ data: { name, sortOrder: (last._max.sortOrder ?? 0) + 1 } });
+      return tx.rarity.create({ data: { name, label, sortOrder: (last._max.sortOrder ?? 0) + 1 } });
     });
   } catch (e) {
     if (isUniqueViolation(e)) throw new ServiceError("Kelangkaan ini sudah ada.", "name");
@@ -58,16 +66,17 @@ export async function createRarity(rawName: string) {
   }
 }
 
-/** Renames the rarity and every card that uses it. */
-export async function renameRarity(id: string, rawName: string) {
+/** Renames the rarity code (and every card that uses it); a given label replaces the full name. */
+export async function renameRarity(id: string, rawName: string, rawLabel?: string) {
   const name = cleanName(rawName);
+  const label = rawLabel === undefined ? undefined : cleanLabel(rawLabel);
   const current = await prisma.rarity.findUnique({ where: { id } });
   if (!current) throw new ServiceError("Kelangkaan tidak ditemukan.");
-  if (current.name === name) return current;
+  if (current.name === name && (label === undefined || current.label === label)) return current;
   try {
     return await prisma.$transaction(async (tx) => {
-      await tx.card.updateMany({ where: { rarity: current.name }, data: { rarity: name } });
-      return tx.rarity.update({ where: { id }, data: { name } });
+      if (current.name !== name) await tx.card.updateMany({ where: { rarity: current.name }, data: { rarity: name } });
+      return tx.rarity.update({ where: { id }, data: { name, label } });
     });
   } catch (e) {
     if (isUniqueViolation(e)) throw new ServiceError("Kelangkaan ini sudah ada.", "name");

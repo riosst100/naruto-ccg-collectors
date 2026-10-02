@@ -31,12 +31,14 @@ test("collection is grouped by rarity, highest first; admin can reorder and mana
 
   // add / rename / delete
   await page.getByPlaceholder("mis. SSR").fill("SSR");
+  await page.getByPlaceholder("mis. Super Super Rare").fill("Super Super Rare");
   await page.getByRole("button", { name: "Tambah", exact: true }).click();
   await expect(page.getByText("Kelangkaan ditambahkan")).toBeVisible();
   const ssr = page.getByRole("row", { name: /SSR/ });
+  await expect(ssr).toContainText("Super Super Rare");
   await expect(ssr).toContainText("0"); // no cards
-  await ssr.getByRole("button", { name: "Ubah nama" }).click();
-  await page.getByRole("dialog").getByLabel("Nama baru").fill("SSR+");
+  await ssr.getByRole("button", { name: "Ubah" }).click();
+  await page.getByRole("dialog").getByLabel("Kode").fill("SSR+");
   await page.getByRole("dialog").getByRole("button", { name: "Simpan" }).click();
   await expect(page.getByRole("row", { name: /SSR\+/ })).toBeVisible();
   await page.getByRole("row", { name: /SSR\+/ }).getByRole("button", { name: "Hapus" }).click();

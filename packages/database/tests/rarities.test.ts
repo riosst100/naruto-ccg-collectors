@@ -21,10 +21,11 @@ const write = { quantity: 1, buyPrice: null, sellPrice: null, notes: null };
 describe("rarity ranking", () => {
   it("creates at the lowest rank, moves up/down, renames cards along, and protects used rarities", async () => {
     await prisma.rarity.deleteMany();
-    await createRarity("Gold");
+    await createRarity("Gold", " Emas ");
     await createRarity("Silver");
     await createRarity("Bronze");
     expect(await names()).toEqual(["Gold", "Silver", "Bronze"]);
+    expect((await listRaritiesRanked()).map((r) => r.label)).toEqual(["Emas", null, null]);
     await expect(createRarity("Gold")).rejects.toBeInstanceOf(ServiceError);
 
     const bronze = (await listRaritiesRanked()).find((r) => r.name === "Bronze")!;
@@ -48,6 +49,10 @@ describe("rarity ranking", () => {
     await expect(deleteRarity(silver.id)).rejects.toBeInstanceOf(ServiceError); // in use
     await renameRarity(silver.id, "Perak");
     expect((await prisma.card.findUniqueOrThrow({ where: { slug: "r-c1" } })).rarity).toBe("Perak");
+    await renameRarity(silver.id, "Perak", "Perak Langka"); // same code, label only
+    expect((await listRaritiesRanked()).find((r) => r.id === silver.id)!.label).toBe("Perak Langka");
+    await renameRarity(silver.id, "Perak", "");
+    expect((await listRaritiesRanked()).find((r) => r.id === silver.id)!.label).toBeNull();
     const platinum = (await listRaritiesRanked()).find((r) => r.name === "Platinum")!;
     await deleteRarity(platinum.id); // unused: ok
     expect(await names()).toEqual(["Gold", "Bronze", "Perak"]);

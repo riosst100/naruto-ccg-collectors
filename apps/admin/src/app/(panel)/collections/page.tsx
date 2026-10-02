@@ -16,7 +16,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
   return (
     <>
       <PageHeader title="Koleksi" subtitle={`${data.total} item koleksi dari semua pengguna · hanya baca`} />
-      <SearchBar placeholder="Nama pengguna, email, nama atau nomor kartu…" q={q} />
+      <SearchBar placeholder="Nama lengkap, email, nama atau nomor kartu…" q={q} />
       {data.items.length === 0 ? (
         <EmptyState title="Tidak ada item koleksi ditemukan" />
       ) : (

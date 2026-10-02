@@ -19,7 +19,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
     <>
       <PageHeader title="Pengguna" subtitle={`${data.total} ${q || role ? "cocok" : "total"}`} />
       <form role="search" className="mb-4 flex flex-wrap items-center gap-2">
-        <input name="q" defaultValue={q} placeholder="Nama pengguna atau email…" className="input max-w-xs" />
+        <input name="q" defaultValue={q} placeholder="Nama lengkap atau email…" className="input max-w-xs" />
         <select name="role" defaultValue={role ?? ""} aria-label="Peran" className="input w-auto">
           <option value="">Semua peran</option>
           {ROLES.map((r) => (

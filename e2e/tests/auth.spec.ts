@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { DEMO, loginWeb, registerFresh, unique, WEB_URL, WEB_PORT } from "./helpers";
+import { DEMO, loginWeb, logoutWeb, registerFresh, unique, WEB_URL, WEB_PORT } from "./helpers";
 
 test.describe("authentication", () => {
   test("register, persistent session survives browser restart, logout kills it server-side", async ({ page, context }) => {
@@ -17,12 +17,12 @@ test.describe("authentication", () => {
     const reopened = await context.browser()!.newContext({ storageState: state, baseURL: WEB_URL });
     const p2 = await reopened.newPage();
     await p2.goto("/");
-    await expect(p2.getByText(`Halo, ${user.name}`)).toBeVisible();
+    await expect(p2.getByRole("button", { name: "Menu akun" })).toContainText(user.name);
     await p2.reload();
-    await expect(p2.getByText(`Halo, ${user.name}`)).toBeVisible();
+    await expect(p2.getByRole("button", { name: "Menu akun" })).toContainText(user.name);
 
     // Logout deletes the DB session: the copied cookie is dead too.
-    await page.getByRole("button", { name: "Keluar" }).click();
+    await logoutWeb(page);
     await expect(page.getByRole("link", { name: "Masuk" })).toBeVisible();
     await p2.reload();
     await expect(p2.getByRole("link", { name: "Masuk" })).toBeVisible();
@@ -77,7 +77,7 @@ test.describe("authentication", () => {
     await page.getByLabel("Email").fill(DEMO.email);
     await page.getByLabel("Kata sandi").fill(DEMO.password);
     await page.getByRole("button", { name: "Masuk" }).click();
-    await expect(page.getByRole("button", { name: "Keluar" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Menu akun" })).toBeVisible();
     expect(new URL(page.url()).host).toBe(`localhost:${WEB_PORT}`);
   });
 });

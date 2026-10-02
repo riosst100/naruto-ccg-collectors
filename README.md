@@ -73,12 +73,12 @@ Ubah lewat `SEED_*` di `.env`. Seed **menolak berjalan** dengan kata sandi bawaa
 
 ## Docker (WSL)
 
-Satu image berisi kedua aplikasi. Compose menjalankan `migrate` (sekali, menerapkan migrasi), lalu `web` (port 3000) dan `admin` (port 3001). **Database SQLite dan folder upload disimpan di filesystem WSL** (bukan di dalam image), sehingga data tetap ada saat container dibuat ulang.
+Compose berjalan dalam **mode dev**: image `naruto-ccg:dev` (stage `dev` di Dockerfile) hanya berisi Node + pnpm, folder proyek di-mount ke `/app`, dan `web`/`admin` menjalankan `next dev`, jadi perubahan kode langsung ter-reload tanpa build ulang. `node_modules` diambil dari folder proyek di WSL, jadi jalankan `pnpm install` di WSL setelah dependensi berubah. Compose menjalankan `migrate` (sekali, menerapkan migrasi), lalu `web` (port 3000) dan `admin` (port 3001). **Database SQLite dan folder upload disimpan di filesystem WSL** (bukan di dalam image), sehingga data tetap ada saat container dibuat ulang. Image produksi (`next build` + `next start`) tetap bisa dibuat dengan `docker build -t naruto-ccg:latest .`.
 
 ```bash
 # di dalam WSL (Ubuntu), dari folder proyek (mis. /mnt/d/naruto-ccg)
 bash docker/setup-wsl.sh --import-dev-data     # buat ~/naruto-ccg-data + docker/compose.env; opsional impor data dev
-docker compose --env-file docker/compose.env up -d --build
+docker compose --env-file docker/compose.env up -d   # --build hanya perlu bila Dockerfile berubah
 ```
 
 - **Domain:** https://naruto-ccg.local (situs) dan https://naruto-ccg.local/admin (admin). Container `proxy` (Caddy, port `PROXY_PORT`=8080) meneruskan `/admin` ke admin dan sisanya ke web. Di mesin ini domain dan HTTPS (`tls internal`) disediakan Caddy milik **lotwork**: proyek "Naruto CCG (Docker)" sudah terdaftar di sana (domain `naruto-ccg.local` → port 8080); Caddyfile lotwork dibuat otomatis dari daftar proyeknya, jadi jangan diedit manual. Entri hosts (`127.0.0.1 naruto-ccg.local`) ditulis lotwork bila dijalankan sebagai Administrator, atau jalankan `powershell -ExecutionPolicy Bypass -File docker\add-hosts.ps1` di PowerShell Administrator. Tanpa lotwork: pakai http://naruto-ccg.local:8080 (butuh `COOKIE_SECURE=false`).

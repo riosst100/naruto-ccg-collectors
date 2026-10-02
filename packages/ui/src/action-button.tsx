@@ -3,6 +3,7 @@
 import { useRef, useTransition, type ReactNode } from "react";
 import type { ActionState } from "@naruto-ccg/shared";
 import { cx } from "./cx";
+import { useUiStrings } from "./strings";
 import { useToast } from "./toast";
 
 /**
@@ -29,6 +30,7 @@ export function ActionButton({
   onSuccess?: () => void;
 }) {
   const toast = useToast();
+  const strings = useUiStrings();
   const [pending, start] = useTransition();
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -37,7 +39,7 @@ export function ActionButton({
     for (const [k, v] of Object.entries(fields)) fd.set(k, v);
     start(async () => {
       const res = await action(fd);
-      if (res?.ok === false) toast.error(res.error ?? "Terjadi kesalahan.");
+      if (res?.ok === false) toast.error(res.error ?? strings.genericError);
       else {
         if (res?.message) toast.success(res.message);
         onSuccess?.();
@@ -66,7 +68,7 @@ export function ActionButton({
           <p className="mt-2 text-sm opacity-80">{confirm.message}</p>
           <div className="mt-5 flex justify-end gap-2">
             <button type="button" className="btn btn-secondary" onClick={() => dialog.current?.close()}>
-              Batal
+              {strings.cancel}
             </button>
             <button
               type="button"
@@ -76,7 +78,7 @@ export function ActionButton({
                 run();
               }}
             >
-              {confirm.confirmLabel ?? "Konfirmasi"}
+              {confirm.confirmLabel ?? strings.confirm}
             </button>
           </div>
         </dialog>

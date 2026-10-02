@@ -22,9 +22,15 @@ import {
   type ActionState,
 } from "@naruto-ccg/shared";
 import { requireUser } from "../auth";
+import { localizeState, translateMessage } from "../i18n/messages";
+import { getDictionary, getLocale } from "../i18n/server";
 
 const str = (fd: FormData, k: string) => (typeof fd.get(k) === "string" ? (fd.get(k) as string) : "");
 const refresh = () => revalidatePath("/", "layout");
+const i18n = async () => {
+  const [locale, t] = await Promise.all([getLocale(), getDictionary()]);
+  return { locale, t, localize: (state: NonNullable<ActionState>) => localizeState(state, locale) };
+};
 
 function collectionFields(fd: FormData) {
   return {
@@ -37,57 +43,66 @@ function collectionFields(fd: FormData) {
 
 export async function addToCollectionAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const user = await requireUser();
+  const { t, localize } = await i18n();
   const parsed = addToCollectionSchema.safeParse({ cardId: str(fd, "cardId"), ...collectionFields(fd) });
-  if (!parsed.success) return failure("Perbaiki kolom yang ditandai.", fieldErrors(parsed.error));
-  return guard(async () => {
+  if (!parsed.success) return localize(failure(t.auth.fixFields, fieldErrors(parsed.error)));
+  const result = await guard(async () => {
     await addToCollection(user.id, parsed.data.cardId, parsed.data);
     refresh();
-    return success("Ditambahkan ke koleksi");
+    return success(t.collection.added);
   });
+  return localize(result);
 }
 
 export async function updateCollectionAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const user = await requireUser();
+  const { t, localize } = await i18n();
   const parsed = updateCollectionSchema.safeParse({ itemId: str(fd, "itemId"), ...collectionFields(fd) });
-  if (!parsed.success) return failure("Perbaiki kolom yang ditandai.", fieldErrors(parsed.error));
-  return guard(async () => {
+  if (!parsed.success) return localize(failure(t.auth.fixFields, fieldErrors(parsed.error)));
+  const result = await guard(async () => {
     await updateCollectionItem(user.id, parsed.data.itemId, parsed.data);
     refresh();
-    return success("Item koleksi diperbarui");
+    return success(t.collection.updated);
   });
+  return localize(result);
 }
 
 export async function adjustQuantityAction(fd: FormData): Promise<ActionState> {
   const user = await requireUser();
+  const { t, localize } = await i18n();
   const delta = Number(str(fd, "delta"));
-  if (delta !== 1 && delta !== -1) return failure("Perubahan tidak valid.");
-  return guard(async () => {
+  if (delta !== 1 && delta !== -1) return failure(t.collection.invalidChange);
+  const result = await guard(async () => {
     await adjustCollectionQuantity(user.id, str(fd, "itemId"), delta);
     refresh();
     return { ok: true };
   });
+  return localize(result);
 }
 
 export async function removeFromCollectionAction(fd: FormData): Promise<ActionState> {
   const user = await requireUser();
-  return guard(async () => {
+  const { t, localize } = await i18n();
+  const result = await guard(async () => {
     const { imageKeys } = await removeFromCollection(user.id, str(fd, "itemId"));
     await Promise.all(imageKeys.map((k) => getStorage().delete(k).catch(() => undefined)));
     refresh();
-    return success("Dihapus dari koleksi");
+    return success(t.collection.removed);
   });
+  return localize(result);
 }
 
 export async function uploadImagesAction(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const user = await requireUser();
   const itemId = str(fd, "itemId");
   const files = fd.getAll("images").filter((f): f is File => f instanceof File && f.size > 0);
-  if (files.length === 0) return failure("Pilih minimal satu gambar.");
+  const { locale, t, localize } = await i18n();
+  if (files.length === 0) return failure(t.images.pickOne);
 
-  return guard(async () => {
+  const result = await guard(async () => {
     const existing = await countCollectionImages(user.id, itemId); // also proves ownership
     if (existing + files.length > UPLOAD_LIMITS.maxImagesPerCollectionItem) {
-      return failure(`Maksimal ${UPLOAD_LIMITS.maxImagesPerCollectionItem} gambar per kartu.`);
+      return failure(`Maksimal ${UPLOAD_LIMITS.maxImagesPerCollectionItem} gambar per kartu.`); // translated by localize()
     }
     let saved = 0;
     for (const file of files) {
@@ -99,21 +114,24 @@ export async function uploadImagesAction(_prev: ActionState, fd: FormData): Prom
       } catch (e) {
         if (key) await getStorage().delete(key).catch(() => undefined);
         refresh();
-        if (e instanceof UploadError) return failure(`${file.name}: ${e.message}`);
+        if (e instanceof UploadError) return failure(`${file.name}: ${translateMessage(e.message, locale)}`);
         throw e;
       }
     }
     refresh();
-    return success(saved === 1 ? "Gambar diunggah" : `${saved} gambar diunggah`);
+    return success(t.images.uploaded(saved));
   });
+  return localize(result);
 }
 
 export async function deleteImageAction(fd: FormData): Promise<ActionState> {
   const user = await requireUser();
-  return guard(async () => {
+  const { t, localize } = await i18n();
+  const result = await guard(async () => {
     const { key } = await removeCollectionImage(user.id, str(fd, "imageId"));
     await getStorage().delete(key).catch(() => undefined);
     refresh();
-    return success("Gambar dihapus");
+    return success(t.images.deleted);
   });
+  return localize(result);
 }

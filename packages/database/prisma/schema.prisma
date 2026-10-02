@@ -15,6 +15,7 @@ model User {
   id           String   @id @default(cuid())
   username     String
   email        String   @unique
+  avatarKey    String? // storage key of the profile photo (avatars/<userId>/<uuid>.<ext>)
   passwordHash String
   role         String   @default("USER") // USER | ADMIN
   status       String   @default("ACTIVE") // ACTIVE | DISABLED
@@ -148,7 +149,8 @@ model CollectionImage {
 /// Names missing from this table sort after all ranked rarities.
 model Rarity {
   id        String   @id @default(cuid())
-  name      String   @unique
+  name      String   @unique /// short code stored on Card.rarity, e.g. "SR"
+  label     String? /// full name shown in admin, e.g. "Super Rare"
   sortOrder Int
   createdAt DateTime @default(now())
 

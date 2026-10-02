@@ -11,7 +11,7 @@ const config: NextConfig = {
   serverExternalPackages: ["@prisma/client", ".prisma/client", "exceljs"],
   outputFileTracingRoot: path.resolve(__dirname, "../.."),
   poweredByHeader: false,
-  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  allowedDevOrigins: ["127.0.0.1", "localhost", "naruto-ccg.local"],
   experimental: { serverActions: { bodySizeLimit: "30mb" } },
   basePath: "/admin",
   async redirects() {

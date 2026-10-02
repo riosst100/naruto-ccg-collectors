@@ -16,19 +16,29 @@ export const passwordSchema = z
   .regex(/[A-Za-z]/, "Harus mengandung huruf")
   .regex(/[0-9]/, "Harus mengandung angka");
 
+/** Display name ("Nama lengkap"); stored in the `username` column. */
+export const fullNameSchema = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/\s+/g, " "))
+  .pipe(
+    z
+      .string()
+      .min(3, "Minimal 3 karakter")
+      .max(60, "Maksimal 60 karakter")
+      .regex(/^[\p{L}\p{M}\p{N} .'-]+$/u, "Hanya huruf, angka, spasi, titik, apostrof, dan strip"),
+  );
+
 export const registerSchema = z
   .object({
-    username: z
-      .string()
-      .trim()
-      .min(3, "Minimal 3 karakter")
-      .max(30, "Maksimal 30 karakter")
-      .regex(/^[A-Za-z0-9_.-]+$/, "Hanya huruf, angka, titik, strip, dan garis bawah"),
+    username: fullNameSchema,
     email: z.string().trim().toLowerCase().max(254).pipe(z.email("Email tidak valid")),
     password: passwordSchema,
     confirmPassword: z.string(),
   })
   .refine((v) => v.password === v.confirmPassword, { path: ["confirmPassword"], message: "Kata sandi tidak cocok" });
+
+export const profileSchema = z.object({ username: fullNameSchema });
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().max(254).pipe(z.email("Email tidak valid")),

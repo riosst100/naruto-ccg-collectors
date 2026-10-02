@@ -2,6 +2,7 @@
 
 import { useId, type ReactNode } from "react";
 import { cx } from "./cx";
+import { useUiStrings } from "./strings";
 
 /**
  * Native <dialog> modal with a trigger button. `children` may be a render function
@@ -21,6 +22,7 @@ export function Modal({
   triggerTitle?: string;
 }) {
   const id = useId();
+  const strings = useUiStrings();
   const dialog = () => document.getElementById(id) as HTMLDialogElement | null;
   const close = () => dialog()?.close();
   return (
@@ -37,7 +39,7 @@ export function Modal({
       >
         <div className="flex items-center justify-between border-b border-black/10 px-5 py-3 dark:border-white/10">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button type="button" aria-label="Tutup" onClick={close} className="rounded p-1 text-xl leading-none opacity-60 hover:opacity-100">
+          <button type="button" aria-label={strings.close} onClick={close} className="rounded p-1 text-xl leading-none opacity-60 hover:opacity-100">
             ×
           </button>
         </div>

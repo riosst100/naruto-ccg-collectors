@@ -9,13 +9,13 @@ export function slugify(input: string): string {
 }
 
 /** Prices are free-form whole numbers typed by the user; no currency is attached. */
-export function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("id-ID").format(amount);
+export function formatMoney(amount: number, locale = "id-ID"): string {
+  return new Intl.NumberFormat(locale).format(amount);
 }
 
-export function formatDate(d: Date | string | null | undefined): string {
+export function formatDate(d: Date | string | null | undefined, locale = "id-ID"): string {
   if (!d) return "—";
-  return new Intl.DateTimeFormat("id-ID", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(d));
+  return new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(d));
 }
 
 export type ActionState = { ok: boolean; message?: string; error?: string; fieldErrors?: Record<string, string> } | null;

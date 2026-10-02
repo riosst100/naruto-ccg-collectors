@@ -19,7 +19,7 @@ try {
   await page.locator('input[name="password"]').fill("Shinobi123");
   await page.getByLabel("Konfirmasi kata sandi").fill("Shinobi123");
   await page.getByRole("button", { name: "Buat akun" }).click();
-  await page.getByText(`Halo, ${name}`).waitFor({ timeout: 15000 });
+  await page.getByRole("button", { name: "Menu akun" }).waitFor({ timeout: 15000 });
   const c = (await ctx.cookies()).find((x) => x.name === "ccg_session");
   out.push(`register+login ok; cookie httpOnly=${c.httpOnly} secure=${c.secure}`);
   await page.goto(`${web}/collection`);

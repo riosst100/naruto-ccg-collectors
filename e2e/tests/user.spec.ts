@@ -123,3 +123,46 @@ test.describe("wishlist & collection", () => {
     await expect(page.getByRole("heading", { name: "Wishlist Saya" })).toBeVisible();
   });
 });
+
+test.describe("profile", () => {
+  test("account menu, edit name, upload and remove photo, logout needs confirmation", async ({ page }) => {
+    await registerFresh(page, "profil");
+    const menu = page.getByRole("button", { name: "Menu akun" });
+
+    await menu.click();
+    await expect(page.getByRole("menuitem", { name: "Wishlist" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Koleksi" })).toBeVisible();
+    await page.getByRole("menuitem", { name: "Lihat profil" }).click();
+    await expect(page).toHaveURL(/\/profile$/);
+    await expect(page.getByRole("heading", { name: "Profil Saya" })).toBeVisible();
+
+    await page.getByLabel("Nama lengkap").fill("Hinata Hyūga");
+    await page.getByRole("button", { name: "Simpan perubahan" }).click();
+    await expect(menu).toContainText("Hinata Hyūga");
+
+    // No photo yet: initials. Upload one: the header shows the image (served only to its owner).
+    await expect(menu.locator("img")).toHaveCount(0);
+    await page.locator('input[name="avatar"]').setInputFiles({ name: "me.png", mimeType: "image/png", buffer: PNG });
+    await expect(menu.locator("img")).toHaveCount(1);
+    const src = await menu.locator("img").getAttribute("src");
+    expect(src).toMatch(/^\/uploads\/avatars\//);
+    expect((await page.request.get(src!)).status()).toBe(200);
+    const anon = await page.context().browser()!.newContext();
+    expect((await anon.request.get(new URL(src!, page.url()).href)).status()).toBe(404);
+    await anon.close();
+
+    await page.getByRole("button", { name: "Hapus foto" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus foto" }).click();
+    await expect(menu.locator("img")).toHaveCount(0);
+
+    // Cancelling the logout dialog keeps the session.
+    await menu.click();
+    await page.getByRole("menuitem", { name: "Keluar" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Batal" }).click();
+    await expect(menu).toBeVisible();
+    await menu.click();
+    await page.getByRole("menuitem", { name: "Keluar" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Keluar" }).click();
+    await expect(page.getByRole("link", { name: "Masuk" })).toBeVisible();
+  });
+});

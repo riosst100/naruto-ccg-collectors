@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CARD_TYPES, PUBLISH_STATUSES, STATUS_LABEL, slugify } from "@naruto-ccg/shared";
-import { Field, FormMessage, Modal, SubmitButton, useActionForm } from "@naruto-ccg/ui";
+import { Field, PasswordInput, FormMessage, Modal, SubmitButton, useActionForm } from "@naruto-ccg/ui";
 import { adminLoginAction, changePasswordAction } from "@/lib/actions/auth";
 import { createCardAction, createSeriesAction, importCardsAction, updateCardAction, updateSeriesAction } from "@/lib/actions/catalog";
 
@@ -16,7 +16,7 @@ export function AdminLoginForm() {
         <input name="email" type="email" required autoComplete="email" className="input" />
       </Field>
       <Field label="Kata sandi" error={state?.fieldErrors?.password}>
-        <input name="password" type="password" required autoComplete="current-password" className="input" />
+        <PasswordInput name="password" required autoComplete="current-password" />
       </Field>
       <SubmitButton pending={pending} className="w-full" pendingText="Sedang masuk…">
         Masuk
@@ -32,13 +32,13 @@ export function ChangePasswordForm() {
     <form method="post" onSubmit={onSubmit} className="max-w-sm space-y-3">
       <FormMessage state={state} />
       <Field label="Kata sandi saat ini" error={e?.currentPassword}>
-        <input name="currentPassword" type="password" required autoComplete="current-password" className="input" />
+        <PasswordInput name="currentPassword" required autoComplete="current-password" />
       </Field>
       <Field label="Kata sandi baru" error={e?.newPassword} hint="Minimal 8 karakter, dengan huruf dan angka.">
-        <input name="newPassword" type="password" required minLength={8} autoComplete="new-password" className="input" />
+        <PasswordInput name="newPassword" required minLength={8} autoComplete="new-password" />
       </Field>
       <Field label="Konfirmasi kata sandi baru" error={e?.confirmPassword}>
-        <input name="confirmPassword" type="password" required autoComplete="new-password" className="input" />
+        <PasswordInput name="confirmPassword" required autoComplete="new-password" />
       </Field>
       <SubmitButton pending={pending}>Ubah kata sandi</SubmitButton>
     </form>

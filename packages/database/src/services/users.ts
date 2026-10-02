@@ -6,6 +6,7 @@ export const safeUserSelect = {
   id: true,
   username: true,
   email: true,
+  avatarKey: true,
   role: true,
   status: true,
   createdAt: true,
@@ -63,6 +64,20 @@ export async function purgeExpiredSessions() {
 
 export async function updatePasswordHash(userId: string, passwordHash: string) {
   await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+}
+
+// ---------- profile ----------
+
+export async function updateProfile(userId: string, data: { username: string }) {
+  return prisma.user.update({ where: { id: userId }, data, select: safeUserSelect });
+}
+
+/** Sets (or clears) the profile photo and returns the previous key so the caller can delete the old file. */
+export async function setUserAvatar(userId: string, avatarKey: string | null) {
+  const prev = await prisma.user.findUnique({ where: { id: userId }, select: { avatarKey: true } });
+  if (!prev) throw new ServiceError("Pengguna tidak ditemukan.");
+  await prisma.user.update({ where: { id: userId }, data: { avatarKey } });
+  return { previousKey: prev.avatarKey };
 }
 
 // ---------- admin ----------

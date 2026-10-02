@@ -7,7 +7,8 @@ const root = path.resolve(__dirname, "..");
 // Isolated database + upload dir so e2e never touches development data.
 const webPort = process.env.E2E_WEB_PORT ?? "3000";
 const adminPort = process.env.E2E_ADMIN_PORT ?? "3001";
-const e2eEnv = { DATABASE_URL: "file:./data/e2e.db", UPLOAD_DIR: "./uploads-e2e" };
+// The specs assert the Indonesian UI, so the web app's default language (normally English) is switched for e2e.
+const e2eEnv = { DATABASE_URL: "file:./data/e2e.db", UPLOAD_DIR: "./uploads-e2e", WEB_DEFAULT_LOCALE: "id" };
 
 // Playwright launches webServers BEFORE globalSetup, so the e2e database is prepared here (main process only).
 if (!process.env.TEST_WORKER_INDEX && !process.env.E2E_DB_READY) {

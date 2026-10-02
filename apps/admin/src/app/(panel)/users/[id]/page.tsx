@@ -25,7 +25,7 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="mb-3 font-semibold">Informasi pengguna</h2>
         <dl className="grid max-w-xl grid-cols-[9rem_1fr] gap-y-2 text-sm">
-          <dt className="text-slate-500">Nama pengguna</dt>
+          <dt className="text-slate-500">Nama lengkap</dt>
           <dd>{user.username}</dd>
           <dt className="text-slate-500">Email</dt>
           <dd>{user.email}</dd>

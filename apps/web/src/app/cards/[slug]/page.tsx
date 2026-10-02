@@ -5,12 +5,14 @@ import { getCardBySlug, getUserCardStates } from "@naruto-ccg/database";
 import { CardActions } from "@/components/forms";
 import { CardImage, RarityBadge } from "@/components/card-tile";
 import { getCurrentUser } from "@/lib/auth";
+import { cardTypeLabel } from "@/lib/i18n/dictionaries";
+import { getDictionary } from "@/lib/i18n/server";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const card = await getCardBySlug((await params).slug);
-  return { title: card ? `${card.name} (#${card.cardNumber})` : "Kartu tidak ditemukan" };
+  const [card, t] = await Promise.all([getCardBySlug((await params).slug), getDictionary()]);
+  return { title: card ? `${card.name} (#${card.cardNumber})` : t.card.notFound };
 }
 
 export default async function CardPage({ params }: Props) {
@@ -18,41 +20,41 @@ export default async function CardPage({ params }: Props) {
   const card = await getCardBySlug(slug);
   if (!card) notFound();
 
-  const user = await getCurrentUser();
+  const [user, t] = await Promise.all([getCurrentUser(), getDictionary()]);
   const states = user ? await getUserCardStates(user.id, [card.id]) : null;
 
   return (
     <div className="grid gap-8 md:grid-cols-[minmax(0,360px)_1fr]">
       <div className="mx-auto w-full max-w-[360px] md:mx-0"><CardImage image={card.image} name={card.name} rarity={card.rarity} /></div>
       <div>
-        <p className="text-sm text-slate-400">
+        <p className="eyebrow mb-2">
           <Link href={`/series/${card.series.slug}`} className="hover:underline">
             {card.series.name}
           </Link>
         </p>
-        <h1 className="mt-1 title-glow text-4xl">{card.name}</h1>
-        <dl className="mt-4 grid max-w-md grid-cols-[8rem_1fr] gap-y-2 text-sm">
-          <dt className="text-slate-400">Nomor kartu</dt>
+        <h1 className="page-title text-4xl">{card.name}</h1>
+        <dl className="mt-6 grid max-w-md grid-cols-[8rem_1fr] items-center gap-y-3 text-sm">
+          <dt className="text-xs font-semibold uppercase tracking-wider text-faint">{t.card.number}</dt>
           <dd>#{card.cardNumber}</dd>
-          <dt className="text-slate-400">Seri</dt>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-faint">{t.card.series}</dt>
           <dd>{card.series.name}</dd>
-          <dt className="text-slate-400">Kelangkaan</dt>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-faint">{t.card.rarity}</dt>
           <dd>
             <RarityBadge rarity={card.rarity} />
           </dd>
-          <dt className="text-slate-400">Tipe kartu</dt>
-          <dd>{card.cardType}</dd>
+          <dt className="text-xs font-semibold uppercase tracking-wider text-faint">{t.card.type}</dt>
+          <dd>{cardTypeLabel(t, card.cardType)}</dd>
         </dl>
 
-        {card.description && <p className="mt-5 max-w-2xl whitespace-pre-line text-slate-300">{card.description}</p>}
+        {card.description && <p className="mt-5 max-w-2xl whitespace-pre-line text-muted">{card.description}</p>}
 
         {card.attributes.length > 0 && (
           <section className="mt-6">
-            <h2 className="mb-2 text-lg font-semibold">Atribut</h2>
-            <dl className="divide-y divide-white/10 overflow-hidden glass rounded-2xl text-sm">
+            <h2 className="mb-3 border-b-[3px] border-brand-500 pb-2 page-title text-2xl">{t.card.attributes}</h2>
+            <dl className="divide-y divide-line overflow-hidden glass !shadow-none text-sm">
               {card.attributes.map((a) => (
                 <div key={a.id} className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-2">
-                  <dt className="font-medium text-slate-400">{a.name}</dt>
+                  <dt className="font-medium text-muted">{a.name}</dt>
                   <dd className="whitespace-pre-line">{a.value}</dd>
                 </div>
               ))}
