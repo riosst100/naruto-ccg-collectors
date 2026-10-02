@@ -27,6 +27,13 @@ pnpm dev                      # web: http://localhost:3000   admin: http://local
 
 Produksi: `pnpm build` lalu `pnpm start`.
 
+### Seeder (data katalog)
+
+`pnpm db:seed` memuat **katalog nyata** dari `packages/database/prisma/seed-data/catalog.json` (urutan kelangkaan, seri, kartu, atribut) beserta gambar seri lokal di `seed-data/uploads/`, lalu membuat akun admin dan demo. Seeder idempoten: data yang sudah ada tidak ditimpa, jadi aman dijalankan ulang.
+
+- Perbarui fixture dari database saat ini: `pnpm db:export-catalog` (untuk database lain: `DATABASE_URL=file:/path/naruto.db UPLOAD_DIR=/path/uploads pnpm db:export-catalog`). Hanya katalog yang diekspor: **pengguna, hash kata sandi, wishlist, dan koleksi tidak ikut**; kartu yang diarsipkan dilewati.
+- `SEED_PROFILE=demo pnpm db:seed` memuat data demo palsu (5 seri, wishlist dan koleksi contoh); dipakai oleh tes e2e.
+
 ### Akun seed (HANYA untuk pengembangan)
 
 | Peran | Email | Kata sandi |
@@ -63,3 +70,21 @@ Ubah lewat `SEED_*` di `.env`. Seed **menolak berjalan** dengan kata sandi bawaa
 - **Upload**: disajikan lewat route `/uploads/[...path]` (bukan `public/`) karena file yang ditambahkan saat runtime tidak dilayani Next di produksi. Direktori default `./uploads` (di-share kedua aplikasi), diatur lewat `UPLOAD_DIR`. Ganti implementasi `StorageDriver` untuk S3/R2/Cloudinary.
 - Next.js dipin ke **16.3.7** karena kebijakan `minimumReleaseAge` pnpm 12 menolak rilis yang berumur < 1 hari; Prisma dipin ke 6.x agar SQLite tidak memerlukan driver native.
 - Halaman Wishlist dan Koleksi tetap muncul di menu untuk pengunjung; bila belum masuk, tampil ajakan untuk mendaftar/masuk.
+
+## Docker (WSL)
+
+Satu image berisi kedua aplikasi. Compose menjalankan `migrate` (sekali, menerapkan migrasi), lalu `web` (port 3000) dan `admin` (port 3001). **Database SQLite dan folder upload disimpan di filesystem WSL** (bukan di dalam image), sehingga data tetap ada saat container dibuat ulang.
+
+```bash
+# di dalam WSL (Ubuntu), dari folder proyek (mis. /mnt/d/naruto-ccg)
+bash docker/setup-wsl.sh --import-dev-data     # buat ~/naruto-ccg-data + docker/compose.env; opsional impor data dev
+docker compose --env-file docker/compose.env up -d --build
+```
+
+- **Domain:** https://naruto-ccg.local (situs) dan https://naruto-ccg.local/admin (admin). Container `proxy` (Caddy, port `PROXY_PORT`=8080) meneruskan `/admin` ke admin dan sisanya ke web. Di mesin ini domain dan HTTPS (`tls internal`) disediakan Caddy milik **lotwork**: proyek "Naruto CCG (Docker)" sudah terdaftar di sana (domain `naruto-ccg.local` → port 8080); Caddyfile lotwork dibuat otomatis dari daftar proyeknya, jadi jangan diedit manual. Entri hosts (`127.0.0.1 naruto-ccg.local`) ditulis lotwork bila dijalankan sebagai Administrator, atau jalankan `powershell -ExecutionPolicy Bypass -File docker\add-hosts.ps1` di PowerShell Administrator. Tanpa lotwork: pakai http://naruto-ccg.local:8080 (butuh `COOKIE_SECURE=false`).
+- Akses langsung tanpa domain: web `http://localhost:${WEB_PORT}`, admin `http://localhost:${ADMIN_PORT}/admin` (bawaan 3000/3001; di mesin ini 3200/3201 karena `pnpm dev` memakai 3000/3001).
+- Data: `~/naruto-ccg-data` (`naruto.db`, `uploads/`); dari Windows: `\wsl$\Ubuntu-24.04\home\<user>\naruto-ccg-data`. Ubah lokasi lewat `DATA_DIR` di `docker/compose.env`. **Backup = salin folder itu.**
+- Port bentrok dengan `pnpm dev`? Ubah `WEB_PORT` / `ADMIN_PORT` di `docker/compose.env`.
+- Database kosong? Isi data contoh: `SEED_ADMIN_PASSWORD='...' SEED_USER_PASSWORD='...' docker compose --env-file docker/compose.env run --rm seed` (kata sandi wajib diisi; kata sandi bawaan ditolak di produksi). Atau impor data dev dengan `--import-dev-data`.
+- `COOKIE_SECURE=true` (di `compose.env`) karena situs diakses lewat HTTPS; cookie `Secure` tetap diterima di `http://localhost`, tetapi tidak di http biasa dengan nama host lain. Set `false` hanya bila memakai http polos (mis. http://naruto-ccg.local:8080 tanpa lotwork).
+- Lihat log: `docker compose --env-file docker/compose.env logs -f web admin`. Hentikan: `docker compose --env-file docker/compose.env down` (data aman).

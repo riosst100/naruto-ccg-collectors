@@ -58,7 +58,8 @@ export function createAuth(config: AuthConfig) {
     await createSessionRecord({ userId, tokenHash: hashToken(token), scope: config.scope, expiresAt, userAgent: ua });
     (await cookies()).set(config.cookieName, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      // COOKIE_SECURE=false allows plain-http deployments (e.g. a local container); default is secure in production.
+      secure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === "true" : process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       ...(config.persistent({ remember }) ? { expires: expiresAt } : {}),

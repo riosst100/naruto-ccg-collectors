@@ -23,36 +23,36 @@ export default async function CardPage({ params }: Props) {
 
   return (
     <div className="grid gap-8 md:grid-cols-[minmax(0,360px)_1fr]">
-      <CardImage image={card.image} name={card.name} className="shadow-lg" />
+      <div className="mx-auto w-full max-w-[360px] md:mx-0"><CardImage image={card.image} name={card.name} rarity={card.rarity} /></div>
       <div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-400">
           <Link href={`/series/${card.series.slug}`} className="hover:underline">
             {card.series.name}
           </Link>
         </p>
-        <h1 className="mt-1 text-3xl font-extrabold tracking-tight">{card.name}</h1>
+        <h1 className="mt-1 title-glow text-4xl">{card.name}</h1>
         <dl className="mt-4 grid max-w-md grid-cols-[8rem_1fr] gap-y-2 text-sm">
-          <dt className="text-slate-500">Nomor kartu</dt>
+          <dt className="text-slate-400">Nomor kartu</dt>
           <dd>#{card.cardNumber}</dd>
-          <dt className="text-slate-500">Seri</dt>
+          <dt className="text-slate-400">Seri</dt>
           <dd>{card.series.name}</dd>
-          <dt className="text-slate-500">Kelangkaan</dt>
+          <dt className="text-slate-400">Kelangkaan</dt>
           <dd>
             <RarityBadge rarity={card.rarity} />
           </dd>
-          <dt className="text-slate-500">Tipe kartu</dt>
+          <dt className="text-slate-400">Tipe kartu</dt>
           <dd>{card.cardType}</dd>
         </dl>
 
-        {card.description && <p className="mt-5 max-w-2xl whitespace-pre-line text-slate-700">{card.description}</p>}
+        {card.description && <p className="mt-5 max-w-2xl whitespace-pre-line text-slate-300">{card.description}</p>}
 
         {card.attributes.length > 0 && (
           <section className="mt-6">
             <h2 className="mb-2 text-lg font-semibold">Atribut</h2>
-            <dl className="divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white text-sm">
+            <dl className="divide-y divide-white/10 overflow-hidden glass rounded-2xl text-sm">
               {card.attributes.map((a) => (
                 <div key={a.id} className="grid grid-cols-[8rem_1fr] gap-3 px-4 py-2">
-                  <dt className="font-medium text-slate-600">{a.name}</dt>
+                  <dt className="font-medium text-slate-400">{a.name}</dt>
                   <dd className="whitespace-pre-line">{a.value}</dd>
                 </div>
               ))}

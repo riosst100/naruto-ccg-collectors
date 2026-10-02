@@ -1,0 +1,20 @@
+# Reverse proxy inside the compose network: one hostname, path-based routing.
+#   /admin/*  -> admin app (basePath /admin)
+#   others    -> web app
+# Matches any Host header, so naruto-ccg.local, localhost and 127.0.0.1 all work.
+{
+	auto_https off
+	admin off
+}
+
+:80 {
+	encode zstd gzip
+
+	handle /admin* {
+		reverse_proxy admin:3001
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}

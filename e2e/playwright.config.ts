@@ -14,7 +14,7 @@ if (!process.env.TEST_WORKER_INDEX && !process.env.E2E_DB_READY) {
   rmSync(path.join(root, "data", "e2e.db"), { force: true });
   rmSync(path.join(root, "uploads-e2e"), { recursive: true, force: true });
   mkdirSync(path.join(root, "data"), { recursive: true });
-  const env = { ...process.env, ...e2eEnv };
+  const env = { ...process.env, ...e2eEnv, SEED_PROFILE: "demo" }; // e2e tests rely on the fake demo catalog
   const script = path.join(root, "packages", "database", "scripts", "prisma.mjs");
   execFileSync(process.execPath, [script, "migrate", "deploy"], { cwd: root, env, stdio: "ignore" });
   execFileSync(process.execPath, [script, "db", "seed"], { cwd: root, env, stdio: "ignore" });

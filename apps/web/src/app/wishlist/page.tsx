@@ -17,11 +17,11 @@ export default async function WishlistPage() {
 
   return (
     <>
-      <h1 className="mb-1 text-3xl font-extrabold tracking-tight">Wishlist Saya</h1>
-      <p className="mb-6 text-slate-600">{items.length} kartu yang Anda inginkan.</p>
+      <h1 className="mb-1 title-glow text-4xl">Wishlist Saya</h1>
+      <p className="mb-6 text-slate-400">{items.length} kartu yang Anda inginkan.</p>
       {items.length === 0 ? (
         <EmptyState title="Wishlist Anda masih kosong">
-          <Link href="/" className="font-medium text-brand-700 underline">
+          <Link href="/" className="font-medium text-brand-400 underline">
             Jelajahi seri
           </Link>{" "}
           lalu ketuk ♡ pada kartu yang Anda inginkan.
@@ -29,15 +29,15 @@ export default async function WishlistPage() {
       ) : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {items.map(({ id, card }) => (
-            <article key={id} className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+            <article key={id} className="flex flex-col glass surface-hover rounded-2xl p-3">
               <Link href={`/cards/${card.slug}`}>
-                <CardImage image={card.image} name={card.name} />
+                <CardImage image={card.image} name={card.name} rarity={card.rarity} />
               </Link>
               <div className="mt-3 flex-1">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   #{card.cardNumber} · {card.series.name}
                 </p>
-                <Link href={`/cards/${card.slug}`} className="font-semibold hover:text-brand-700">
+                <Link href={`/cards/${card.slug}`} className="font-semibold hover:text-brand-400">
                   {card.name}
                 </Link>
                 <div className="mt-1">
@@ -45,7 +45,7 @@ export default async function WishlistPage() {
                 </div>
               </div>
               <div className="mt-3 space-y-2">
-                <Link href={`/cards/${card.slug}`} className="btn btn-ghost w-full border border-slate-200">
+                <Link href={`/cards/${card.slug}`} className="btn btn-ghost w-full border border-white/10">
                   Lihat detail
                 </Link>
                 <CardActions cardId={card.id} cardName={card.name} loggedIn next="/wishlist" wishlisted ownedQty={states.owned.get(card.id) ?? 0} />

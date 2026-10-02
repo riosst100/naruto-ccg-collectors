@@ -4,15 +4,129 @@
 @theme {
   --color-brand-50: #fff7ed;
   --color-brand-100: #ffedd5;
+  --color-brand-400: #fb923c;
   --color-brand-500: #f97316;
   --color-brand-600: #ea580c;
   --color-brand-700: #c2410c;
   --color-brand-900: #7c2d12;
+  --font-display: "Impact", "Haettenschweiler", "Arial Narrow Bold", system-ui, sans-serif;
 }
 
 html {
-  color-scheme: light;
+  color-scheme: dark;
 }
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply text-slate-100 antialiased;
+  background-color: #090b14;
+  background-image:
+    radial-gradient(60rem 32rem at 12% -8%, rgb(249 115 22 / 0.18), transparent 60%),
+    radial-gradient(52rem 30rem at 92% 4%, rgb(139 92 246 / 0.2), transparent 60%),
+    radial-gradient(40rem 24rem at 50% 108%, rgb(14 165 233 / 0.1), transparent 60%);
+  background-attachment: fixed;
+}
+::selection {
+  background: rgb(249 115 22 / 0.4);
+}
+
+/* ---------- page chrome ---------- */
+.glass {
+  @apply border border-white/10 bg-white/[0.04] backdrop-blur-md;
+}
+.title-glow {
+  @apply bg-gradient-to-r from-amber-200 via-brand-400 to-fuchsia-400 bg-clip-text text-transparent;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+.surface-hover {
+  @apply transition duration-300 hover:-translate-y-1 hover:border-brand-500/50 hover:shadow-[0_12px_40px_-12px_rgb(249_115_22_/_0.45)];
+}
+
+/* ---------- holographic card ---------- */
+.holo {
+  --mx: 50%;
+  --my: 50%;
+  --rx: 0deg;
+  --ry: 0deg;
+  --o: 0;
+  --s: 1;
+  --foil: 0;
+  --glow: 255 255 255;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 0.6rem;
+  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--s));
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s;
+  box-shadow: 0 10px 28px -12px rgb(var(--glow) / 0.55), 0 0 0 1px rgb(255 255 255 / 0.08);
+  will-change: transform;
+}
+.holo[data-active="true"] {
+  --s: 1.04;
+  transition: transform 0.08s linear, box-shadow 0.35s;
+  box-shadow: 0 22px 44px -14px rgb(var(--glow) / 0.8), 0 0 0 1px rgb(255 255 255 / 0.2);
+}
+.holo[data-tier="rare"] { --foil: 0.35; --glow: 52 211 153; }
+.holo[data-tier="super"] { --foil: 0.5; --glow: 56 189 248; }
+.holo[data-tier="ultra"] { --foil: 0.65; --glow: 251 191 36; }
+.holo[data-tier="secret"] { --foil: 0.85; --glow: 217 70 239; }
+
+.holo > img,
+.holo > div:first-child {
+  display: block;
+}
+.holo-foil,
+.holo-glare,
+.holo-sparkle,
+.holo-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.holo-foil {
+  background: repeating-linear-gradient(115deg, #ff0080 0%, #ffae00 10%, #f7ff00 20%, #00ff8c 30%, #00c8ff 40%, #8a5cff 50%, #ff0080 60%);
+  background-size: 300% 300%;
+  background-position: var(--mx) var(--my);
+  mix-blend-mode: color-dodge;
+  filter: brightness(0.75) contrast(1.3) saturate(1.2);
+  opacity: calc(var(--o) * var(--foil));
+  transition: opacity 0.3s;
+}
+.holo-sparkle {
+  background-image:
+    radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 80%, #fff 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 85% 15%, #fff 0 1px, transparent 2px);
+  background-size: 38px 38px, 53px 53px, 71px 71px, 47px 47px;
+  background-position: calc(var(--mx) * 0.4) calc(var(--my) * 0.4);
+  mix-blend-mode: color-dodge;
+  opacity: calc(var(--o) * var(--foil) * 1.3);
+  transition: opacity 0.3s;
+}
+.holo-glare {
+  background: radial-gradient(farthest-corner circle at var(--mx) var(--my), rgb(255 255 255 / 0.6), rgb(255 255 255 / 0.12) 35%, transparent 65%);
+  mix-blend-mode: overlay;
+  opacity: var(--o);
+  transition: opacity 0.3s;
+}
+/* idle kilau: a diagonal light band sweeps across rare cards even without hover (also works on touch screens) */
+.holo-sweep {
+  background: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%);
+  background-size: 250% 100%;
+  background-position: 150% 0;
+  mix-blend-mode: soft-light;
+  opacity: 0;
+}
+.holo:not([data-tier="common"]) .holo-sweep {
+  opacity: calc(1 - var(--o));
+  animation: holo-sweep 4.5s ease-in-out infinite;
+}
+@keyframes holo-sweep {
+  0%, 55% { background-position: 150% 0; }
+  100% { background-position: -50% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .holo { transition: none; transform: none; }
+  .holo-sweep { animation: none !important; }
 }

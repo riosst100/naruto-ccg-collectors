@@ -18,7 +18,8 @@
     "db:generate": "pnpm --filter @naruto-ccg/database prisma generate",
     "db:migrate": "pnpm --filter @naruto-ccg/database prisma migrate dev",
     "db:deploy": "pnpm --filter @naruto-ccg/database prisma migrate deploy",
-    "db:seed": "pnpm --filter @naruto-ccg/database seed"
+    "db:seed": "pnpm --filter @naruto-ccg/database seed",
+    "db:export-catalog": "pnpm --filter @naruto-ccg/database export-catalog"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

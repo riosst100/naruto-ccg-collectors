@@ -25,15 +25,15 @@ export default async function SeriesPage({ params }: Props) {
   return (
     <>
       <section className="mb-8 flex flex-col gap-5 sm:flex-row">
-        <div className="aspect-video w-full overflow-hidden rounded-xl bg-slate-200 sm:w-72 sm:shrink-0">
+        <div className="aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-[0_12px_40px_-16px_rgb(249_115_22_/_0.5)] sm:w-72 sm:shrink-0">
           {series.image && <img src={imageUrl(series.image)!} alt={series.name} className="h-full w-full object-contain" />}
         </div>
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">{series.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="title-glow text-4xl">{series.name}</h1>
+          <p className="mt-1 text-sm text-slate-400">
             {series.cardCount} kartu · Rilis {formatDate(series.releaseDate)}
           </p>
-          {series.description && <p className="mt-3 max-w-2xl whitespace-pre-line text-slate-700">{series.description}</p>}
+          {series.description && <p className="mt-3 max-w-2xl whitespace-pre-line text-slate-300">{series.description}</p>}
         </div>
       </section>
 

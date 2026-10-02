@@ -28,9 +28,9 @@ export function LoginForm({ next }: { next: string }) {
       <SubmitButton pending={pending} className="w-full" pendingText="Sedang masuk…">
         Masuk
       </SubmitButton>
-      <p className="text-center text-sm text-slate-600">
+      <p className="text-center text-sm text-slate-400">
         Baru di sini?{" "}
-        <Link className="font-medium text-brand-700 underline" href={`/register?next=${encodeURIComponent(next)}`}>
+        <Link className="font-medium text-brand-400 underline" href={`/register?next=${encodeURIComponent(next)}`}>
           Daftar sekarang
         </Link>
       </p>
@@ -60,9 +60,9 @@ export function RegisterForm({ next }: { next: string }) {
       <SubmitButton pending={pending} className="w-full" pendingText="Membuat akun…">
         Buat akun
       </SubmitButton>
-      <p className="text-center text-sm text-slate-600">
+      <p className="text-center text-sm text-slate-400">
         Sudah punya akun?{" "}
-        <Link className="font-medium text-brand-700 underline" href={`/login?next=${encodeURIComponent(next)}`}>
+        <Link className="font-medium text-brand-400 underline" href={`/login?next=${encodeURIComponent(next)}`}>
           Masuk
         </Link>
       </p>
@@ -105,7 +105,7 @@ export function CardActions({
       <ActionButton
         action={wishlisted ? removeFromWishlistAction : addToWishlistAction}
         fields={{ cardId }}
-        className={wishlisted ? "btn-secondary flex-1 !border-rose-300 !text-rose-700" : "btn-secondary flex-1"}
+        className={wishlisted ? "btn-secondary flex-1 !border-rose-400/50 !text-rose-300" : "btn-secondary flex-1"}
         title={wishlisted ? "Hapus dari wishlist" : "Tambah ke wishlist"}
       >
         {wishlisted ? "♥ Di Wishlist" : "♡ Wishlist"}
@@ -157,7 +157,7 @@ export function CollectionForm({
       <Field label="Catatan" error={e?.notes}>
         <textarea name="notes" rows={2} maxLength={1000} defaultValue={item?.notes ?? ""} className="input" />
       </Field>
-      {mode === "add" && <p className="text-xs text-slate-500">Jika Anda sudah memiliki kartu ini, jumlahnya akan ditambahkan ke kartu yang ada.</p>}
+      {mode === "add" && <p className="text-xs text-slate-400">Jika Anda sudah memiliki kartu ini, jumlahnya akan ditambahkan ke kartu yang ada.</p>}
       <div className="flex justify-end gap-2 pt-1">
         <button type="button" className="btn btn-secondary" onClick={close}>
           Batal
@@ -205,7 +205,7 @@ export function ImageUploader({ itemId }: { itemId: string }) {
           name="images"
           multiple
           accept="image/jpeg,image/png,image/webp"
-          className="max-w-full text-xs file:mr-2 file:rounded-md file:border-0 file:bg-slate-100 file:px-2 file:py-1 file:text-xs"
+          className="max-w-full text-xs file:mr-2 file:rounded-md file:border-0 file:bg-white/10 file:text-slate-200 file:px-2 file:py-1 file:text-xs"
           onChange={(ev) =>
             setSelection({ files: Array.from(ev.target.files ?? []).map((f) => ({ name: f.name, url: URL.createObjectURL(f) })), baseline: state })
           }
@@ -219,7 +219,7 @@ export function ImageUploader({ itemId }: { itemId: string }) {
       {previews.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {previews.map((p) => (
-            <img key={p.url} src={p.url} alt={`Pratinjau ${p.name}`} className="h-16 w-12 rounded border border-slate-200 object-cover" />
+            <img key={p.url} src={p.url} alt={`Pratinjau ${p.name}`} className="h-16 w-12 rounded border border-white/10 object-cover" />
           ))}
         </div>
       )}

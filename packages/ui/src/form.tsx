@@ -48,7 +48,7 @@ export function FormMessage({ state, toastOnSuccess = true }: { state: ActionSta
   }, [state, toast, toastOnSuccess]);
   if (!state || state.ok || !state.error) return null;
   return (
-    <p role="alert" className="whitespace-pre-line rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+    <p role="alert" className="whitespace-pre-line rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/15 dark:text-red-300">
       {state.error}
     </p>
   );

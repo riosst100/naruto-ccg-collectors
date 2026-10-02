@@ -28,7 +28,7 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
 
   return (
     <>
-      <h1 className="mb-4 text-3xl font-extrabold tracking-tight">Koleksi Saya</h1>
+      <h1 className="mb-4 title-glow text-4xl">Koleksi Saya</h1>
 
       <section className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Kartu Unik" value={String(summary.uniqueCards)} />
@@ -49,7 +49,7 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
 
       {items.length === 0 ? (
         <EmptyState title={q ? "Tidak ada kartu yang cocok" : "Koleksi Anda masih kosong"}>
-          <Link href="/" className="font-medium text-brand-700 underline">
+          <Link href="/" className="font-medium text-brand-400 underline">
             Jelajahi seri
           </Link>{" "}
           dan tambahkan kartu yang Anda miliki.
@@ -58,9 +58,9 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
         <div className="space-y-10">
           {groups.map((g) => (
             <section key={g.rarity} aria-label={`Kelangkaan ${g.rarity}`}>
-              <h2 className="mb-3 flex flex-wrap items-baseline gap-2 border-b border-slate-200 pb-2 text-xl font-bold">
+              <h2 className="mb-3 flex flex-wrap items-baseline gap-2 border-b border-white/10 pb-2 text-xl font-bold">
                 {g.rarity}
-                <span className="text-sm font-normal text-slate-500">
+                <span className="text-sm font-normal text-slate-400">
                   {g.items.length} kartu unik · {g.items.reduce((n, i) => n + i.quantity, 0)} total
                 </span>
               </h2>
@@ -69,22 +69,22 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
             const { card } = item;
             const hidden = card.status !== "PUBLISHED" || card.archivedAt;
             return (
-              <article key={item.id} className="grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[110px_1fr]">
+              <article key={item.id} className="grid gap-4 glass rounded-2xl p-4 sm:grid-cols-[110px_1fr]">
                 <div>
-                  <CardImage image={card.image} name={card.name} />
+                  <CardImage image={card.image} name={card.name} rarity={card.rarity} />
                 </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-400">
                         #{card.cardNumber} · {card.series.name}
                       </p>
                       <h3 className="text-lg font-semibold">
-                        {hidden ? card.name : <Link href={`/cards/${card.slug}`} className="hover:text-brand-700">{card.name}</Link>}
+                        {hidden ? card.name : <Link href={`/cards/${card.slug}`} className="hover:text-brand-400">{card.name}</Link>}
                       </h3>
                       <div className="mt-1 flex items-center gap-2">
                         <RarityBadge rarity={card.rarity} />
-                        {hidden && <span className="badge bg-slate-100 text-slate-600">Tidak lagi ada di katalog</span>}
+                        {hidden && <span className="badge bg-white/10 text-slate-300">Tidak lagi ada di katalog</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -106,13 +106,13 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
                     <Money label="Total beli" minor={item.buyPrice == null ? null : item.buyPrice * item.quantity} />
                     <Money label="Total jual" minor={item.sellPrice == null ? null : item.sellPrice * item.quantity} />
                   </dl>
-                  {item.notes && <p className="mt-2 text-sm text-slate-600">“{item.notes}”</p>}
+                  {item.notes && <p className="mt-2 text-sm text-slate-400">“{item.notes}”</p>}
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     {item.images.map((img) => (
                       <div key={img.id} className="relative">
                         <a href={imageUrl(img.imageUrl)!} target="_blank" rel="noreferrer">
-                          <img src={imageUrl(img.imageUrl)!} alt={`Kartu milik Anda: ${card.name}`} className="h-20 w-14 rounded border border-slate-200 object-cover" />
+                          <img src={imageUrl(img.imageUrl)!} alt={`Kartu milik Anda: ${card.name}`} className="h-20 w-14 rounded border border-white/10 object-cover" />
                         </a>
                         <DeleteImageButton imageId={img.id} />
                       </div>
@@ -123,7 +123,7 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
                     <ImageUploader itemId={item.id} />
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+                  <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-3">
                     <EditItemModal
                       cardName={card.name}
                       item={{ id: item.id, quantity: item.quantity, buyPrice: item.buyPrice, sellPrice: item.sellPrice, notes: item.notes }}
@@ -157,8 +157,8 @@ export default async function CollectionPage({ searchParams }: { searchParams: P
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+    <div className="glass rounded-2xl p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
       <p className="mt-1 text-2xl font-bold">{value}</p>
     </div>
   );
@@ -167,7 +167,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Money({ label, minor }: { label: string; minor: number | null }) {
   return (
     <div>
-      <dt className="text-xs text-slate-500">{label}</dt>
+      <dt className="text-xs text-slate-400">{label}</dt>
       <dd className="font-medium">{minor == null ? "—" : formatMoney(minor)}</dd>
     </div>
   );

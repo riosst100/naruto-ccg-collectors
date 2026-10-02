@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/next-env.d.ts
+**/*.tsbuildinfo
+.git
+.env
+.env.*
+data
+uploads
+uploads-e2e
+docker/compose.env
+e2e/test-results
+e2e/playwright-report
+*.log

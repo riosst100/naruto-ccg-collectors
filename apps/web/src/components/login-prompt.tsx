@@ -6,7 +6,7 @@ export function LoginPrompt({ title, next }: { title: string; next: string }) {
   const q = encodeURIComponent(next);
   return (
     <>
-      <h1 className="mb-6 text-3xl font-extrabold tracking-tight">{title}</h1>
+      <h1 className="mb-6 title-glow text-4xl">{title}</h1>
       <EmptyState title="Silakan daftar atau masuk untuk menambahkan koleksi Anda">
         <div className="mt-4 flex justify-center gap-2">
           <Link href={`/login?next=${q}`} className="btn btn-secondary">

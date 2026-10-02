@@ -1,0 +1,91 @@
+# Run from WSL:  docker compose --env-file docker/compose.env up -d --build
+# (docker/setup-wsl.sh creates docker/compose.env and the data directory inside the WSL filesystem)
+name: naruto-ccg
+
+x-app: &app
+  image: naruto-ccg:latest
+  user: "${APP_UID:-1000}:${APP_GID:-1000}"
+  environment: &env
+    NODE_ENV: production
+    DATABASE_URL: file:/data/naruto.db
+    UPLOAD_DIR: /data/uploads
+    STORAGE_DRIVER: local
+    # Cookies are "Secure" in production. Keep false while serving plain http; set true behind HTTPS.
+    COOKIE_SECURE: ${COOKIE_SECURE:-false}
+  volumes:
+    # Database + uploaded images live on the WSL (ext4) filesystem, shared by both apps.
+    - ${DATA_DIR:?run docker/setup-wsl.sh first}:/data
+
+services:
+  # One-shot: applies pending database migrations, then exits.
+  migrate:
+    <<: *app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    command: ["node", "packages/database/scripts/prisma.mjs", "migrate", "deploy"]
+
+  web:
+    <<: *app
+    working_dir: /app/apps/web
+    command: ["./node_modules/.bin/next", "start", "-p", "3000"]
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  admin:
+    <<: *app
+    working_dir: /app/apps/admin
+    command: ["./node_modules/.bin/next", "start", "-p", "3001"]
+    ports:
+      - "${ADMIN_PORT:-3001}:3001"
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/admin/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # Single entry point: http://naruto-ccg.local:${PROXY_PORT} (site) and /admin (admin). Needs the hosts entry, see README.
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "${PROXY_BIND:-127.0.0.1}:${PROXY_PORT:-8080}:80"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      web:
+        condition: service_healthy
+      admin:
+        condition: service_healthy
+
+  # Optional: `docker compose --env-file docker/compose.env run --rm seed` loads demo data (needs SEED_* passwords).
+  seed:
+    <<: *app
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      <<: *env
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@naruto-ccg.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_USER_EMAIL: ${SEED_USER_EMAIL:-user@naruto-ccg.local}
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["node", "packages/database/scripts/prisma.mjs", "db", "seed"]

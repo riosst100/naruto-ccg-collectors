@@ -7,3 +7,6 @@ data/
 uploads/
 *.tsbuildinfo
 next-env.d.ts
+
+# Docker (see docker/): compose settings live in docker/compose.env
+docker/compose.env
